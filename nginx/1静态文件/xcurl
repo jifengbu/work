@@ -1,0 +1,2 @@
+
+xget -u http://localhost:8080/nginx.conf

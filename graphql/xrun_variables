@@ -1,0 +1,1 @@
+xget -u "http://localhost:4000/graphql?query=query+getUser(\$id:Int,\$params:JSON){user(id:\$id,params:\$params){id,name,params}}&variables={\"id\":1,\"params\":{\"fang\":1,\"yun\":2}}"

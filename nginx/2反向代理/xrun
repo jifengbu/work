@@ -1,0 +1,4 @@
+
+#nginx -p . -c config/nginx.conf
+nginx -p . -s reload -c config/nginx.conf
+#nginx -p . -s stop -c config/nginx.conf
