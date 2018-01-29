@@ -1,0 +1,13 @@
+#!/bin/bash
+
+xget -u http://localhost:8080/
+xget -u http://localhost:8080/xx/xx
+xget -u http://localhost:8080/fang
+xget -u http://localhost:8080/fang123
+xget -u http://localhost:8080/yun
+xget -u http://localhost:8080/yun/123
+xget -u http://localhost:8080/yun123
+xget -u http://localhost:8080/yun1
+xget -u http://localhost:8080/Yun1
+xget -u http://localhost:8080/jiang1
+xget -u http://localhost:8080/jIAng1
