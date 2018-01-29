@@ -1,4 +1,12 @@
+#!/bin/bash
 
-nginx -p . -c config/nginx.conf
-#nginx -p . -s reload -c config/nginx.conf
-#nginx -p . -s stop -c config/nginx.conf
+if [ "$1" = "-s" ];then
+  nginx -p . -c config/nginx.conf
+elif [ "$1" = "-r" ];then
+  nginx -p . -s reload -c config/nginx.conf
+elif [ "$1" = "-q" ];then
+  nginx -p . -s stop -c config/nginx.conf
+else
+  echo "Usage:"
+  echo "      xrun -s[start] -r[restart] -q[quit]"
+fi
