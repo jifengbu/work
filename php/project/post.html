@@ -31,18 +31,18 @@
 				<td>提交地址：</td>
 				<td><input type="text" name="serverUrl" value="http://ceshi.allinpay.com/gateway/index.do"/></td>
 			</tr>
-		
+
 			<tr>
 				<td>1. 字符集:</td>
 				<td><input type="text" name="inputCharset" value="1"/></td>
-			</tr>	
-			<tr>
-				<td>2. 取货地址:</td>
-				<td><input type="text" name="pickupUrl" value="http://localhost:8088/demo/pickup.php"/><font color="red">*</font></td>
 			</tr>
 			<tr>
-				<td>3. 商户系统通知地址:</td>
-				<td><input type="text" name="receiveUrl" value="http://localhost:8088/demo/receive.php"/><font color="red">*</font></td>
+				<td>2. 取货地址11:</td>
+				<td><input type="text" name="pickupUrl" value="http://localhost/project/pickup.php"/><font color="red">*</font></td>
+			</tr>
+			<tr>
+				<td>3. 商户系统通知地址11:</td>
+				<td><input type="text" name="receiveUrl" value="http://localhost/project/receive.php"/><font color="red">*</font></td>
 			</tr>
 			<tr>
 				<td>4. 版本号:</td>
@@ -99,7 +99,7 @@
 			<tr>
 				<td>17. 订单过期时间:</td>
 				<td><input type="text" name="orderExpireDatetime" value=""/></td>
-			</tr>	
+			</tr>
 			<tr>
 				<td>18. 商品名称:</td>
 				<td><input type="text" name="productName" value=""/></td>
@@ -131,7 +131,7 @@
 			<tr>
 				<td>25. 业务扩展字段:</td>
 				<td><input type="text" name="extTL" value=""/></td>
-			</tr>				
+			</tr>
 			<tr>
 				<td>26. 支付方式:</td>
 				<td><input type="text" name="payType" value="0"/><font color="red">*</font></td>
@@ -139,7 +139,7 @@
 			<tr>
 				<td>27. 发卡方代码:</td>
 				<td><input type="text" name="issuerId" value="" /><span style="font-size:12px;color:blue;"></span></td>
-			</tr>	
+			</tr>
 			<tr>
 				<td>28. 付款人支付卡号:</td>
 				<td><input type="text" name="pan" value=""/></td>
@@ -157,7 +157,7 @@
 </form>
 
 <script language="javascript">
-	//setOrderNo();	
+	//setOrderNo();
 	function setOrderNo() {
 		var curr = new Date();
 		var m = curr.getMonth() + 1;
@@ -170,7 +170,7 @@
 		if (mi < 10) {mi = '0' + mi;}
 		var s = curr.getSeconds();
 		if (s < 10) {s = '0' + s;}
-		var strDatetime = '' + curr.getFullYear() + m + d + h + mi + s;		
+		var strDatetime = '' + curr.getFullYear() + m + d + h + mi + s;
 		document.getElementById("orderDatetime").value = strDatetime;
 		document.getElementById("orderNo").value = 'NO' + strDatetime;
 	}
