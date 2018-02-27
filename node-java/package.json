@@ -1,0 +1,6 @@
+{
+  "name": "node-java",
+  "dependencies": {
+    "java": "^0.9.0"
+  }
+}
