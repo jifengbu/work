@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#emcc index.c -s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' -o index.js
+
+emcc --js-library jslib.js index.c -o index.js
