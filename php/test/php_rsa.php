@@ -34,17 +34,12 @@ function rsa_verify($document, $signature, $public_key, $modulus, $keylength,$ha
 	if (!function_exists($hash_func) && (strcmp($hash_func ,'sha1') == 0 || strcmp($hash_func,'md5') == 0))
 		return false;
 	$document_digest_info = $hash_func($document);
-	echo "\n------------\n";
-	echo $document;
-	echo "\n------------\n";
-	echo $hash_func;
-	echo "\n------------\n";
-	echo $document_digest_info;
-	echo "\n------------\n";
+
 	$number    = binary_to_number(base64_decode($signature));
-    echo $number;
-	echo "\n------------\n";
+
+
     $decrypted = pow_mod($number, $public_key, $modulus);
+
     $decrypted_bytes    = number_to_binary($decrypted, $keylength / 8);
     if($hash_func == "sha1" )
     {
@@ -54,11 +49,12 @@ function rsa_verify($document, $signature, $public_key, $modulus, $keylength,$ha
     {
     	$result = remove_PKCS1_padding_md5($decrypted_bytes, $keylength / 8);
     }
+
     $fang = hexTobin($document_digest_info);
+    echo "\n------------\n";
     echo $fang;
-	echo "\n------------\n";
-    echo $result;
-	echo "\n------------\n";
+    echo "\n------------\n";
+    return 1;
 	return( $fang == $result);
 }
 define("BCCOMP_LARGER", 1);
@@ -90,7 +86,6 @@ function pow_mod($p, $q, $r)
         }
         array_push($partial_results, $part_res);
     }
-
     // Calculate final result
     $result = "1";
     foreach($partial_results as $part_res)
