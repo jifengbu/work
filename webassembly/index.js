@@ -20,3 +20,5 @@ clibs._call_js_code(4, 5);
 clibs._call_js_code_and_return(5, 5);
 
 clibs._call_js_function(5, 10);
+
+clibs._my_sleep();

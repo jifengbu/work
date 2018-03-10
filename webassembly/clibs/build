@@ -2,4 +2,4 @@
 
 #emcc index.c -s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' -o index.js
 
-emcc --js-library jslib.js index.c -o index.js
+emcc --js-library jslib.js -s ASYNCIFY=1 -o index.js index.c 

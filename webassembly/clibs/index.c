@@ -44,3 +44,9 @@ void EMSCRIPTEN_KEEPALIVE hello (int x, int y) {
 int EMSCRIPTEN_KEEPALIVE add (int x, int y) {
     return x + y;
 }
+
+void EMSCRIPTEN_KEEPALIVE my_sleep () {
+    printf("sleep start\n");
+    emscripten_sleep(1000);
+    printf("sleep end\n");
+}
