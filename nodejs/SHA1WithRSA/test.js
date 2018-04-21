@@ -13,6 +13,7 @@ const signedMsg = sign.sign(PRIVATE_KEY, 'hex');
 console.log('orign:', text);
 console.log('signed:', signedMsg);
 // 公钥进行验证
+// const verify = crypto.createVerify('RSA-SHA1');
 const verify = crypto.createVerify('RSA-SHA256');
 verify.update(text);
 const result = verify.verify(PUBLIC_KEY, signedMsg, 'hex');
