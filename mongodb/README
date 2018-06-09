@@ -1,0 +1,38 @@
+1. 配置分片服务器
+cd 27010/27011/27012
+./run
+# run脚本的内容如下：
+# mongod --shardsvr --port 27010 --dbpath ./db --replSet shard0 --directoryperdb
+#
+mongo --port 27010
+> rs.initiate({_id:'shard0',members:[{_id:0,host:'127.0.0.1:27010',priority:1},{_id:1,host:'127.0.0.1:27011',priority:2},{_id:2,host:'127.0.0.1:27012',arbiterOnly:true}]})
+
+
+2. 启动配置服务器
+cd configserver
+./run
+# run脚本的内容如下：
+# mongod --configsvr --port 27013 --dbpath ./db --bind_ip_all --replSet=conf
+#
+# 如果需要配置多个配置服务器，修改端口即可
+mongo --port 27013
+> rs.initiate({_id:'conf',members:[{_id:0,host:'127.0.0.1:27013'}]})
+
+
+3. 启动mongos
+./run
+# run脚本的内容如下：
+# mongos --port=27017 --bind_ip_all --configdb=conf/127.0.0.1:27013
+#
+mongo
+> use admin
+> db.runCommand({addshard:"shard0/127.0.0.1:27010,127.0.0.1:27011,127.0.0.1:27012"})
+> db.runCommand({listshards:1})
+> db.runCommand({enablesharding: "test"})
+> db.runCommand({shardcollection:"test.fang", key:{id: 1}})
+
+
+4. 测试数据
+mongo
+> use test
+> for(var i=1; i<=10000; i++)db.fang.save({id:i,"name":"name_"+i})

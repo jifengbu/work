@@ -1,0 +1,1 @@
+mongos --port=27017 --bind_ip_all --configdb=conf/127.0.0.1:27013

@@ -1,0 +1,1 @@
+mongod --configsvr --port 27013 --dbpath ./db --bind_ip_all --replSet=conf

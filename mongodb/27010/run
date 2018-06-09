@@ -1,0 +1,1 @@
+mongod --shardsvr --port 27010 --dbpath ./db --replSet shard0 --directoryperdb
