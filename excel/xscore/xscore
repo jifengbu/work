@@ -338,28 +338,51 @@ async function main(filename, min, max) {
     });
     getInputValue(filename, wb, ws, map);
 }
+async function clearScore(...list) {
+    const wb = new Excel.Workbook();
+    await wb.xlsx.readFile(filename);
+    const ws = wb.getWorksheet(1);
+    for (const item of list) {
+        for (let i=item[0]; i<=item[1]; i++) {
+            ws.getCell(`E${i}`).value = null;
+            ws.getCell(`Q${i}`).value = null;
+        }
+    }
+    await wb.xlsx.writeFile(filename);
+    console.log('清空完成');
+}
 
 program
 .version('0.0.1')
 .option('-b, --banji <1>', '设置班级，1：1班，2：2班，3：3班')
 .option('-f, --filename <xx.xlsx>', '设置文件')
 .option('-m, --mohu', '是否使用模糊音h=f/l=n')
+.option('-c, --clear <清空>', '清空所有的班级成绩，必须输入：清空')
 .parse(process.argv);
 
 if (!process.argv.slice(2).length) {
     program.help();
 }
 
-const { banji, filename } = program;
+const { banji, filename, clear } = program;
 if (!filename) {
     console.log('必须设置xlsx文件');
     process.exit(0);
 }
-
-if (banji === '1') {
-    main(filename, 4, 38);
-} else if (banji === '2') {
-    main(filename, 47, 81);
-} else if (banji === '3') {
-    main(filename, 90, 124);
+if (clear) {
+    if (clear === '清空') {
+        clearScore([4, 38], [47, 81], [90, 124]);
+    } else {
+        dialog.error('error：要清空成绩请输入: -e 清空');
+    }
+} else {
+    if (banji === '1') {
+        main(filename, 4, 38);
+    } else if (banji === '2') {
+        main(filename, 47, 81);
+    } else if (banji === '3') {
+        main(filename, 90, 124);
+    } else {
+        dialog.error('error：请选择班级');
+    }
 }
