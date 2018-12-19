@@ -22,4 +22,4 @@
 
 * 修改端口 Listen 80， 默认为80端口
 
-* 访问 `http://localhost/test/info.php` `http://localhost/project`
+* 访问 `http://localhost/info/info.php` `http://localhost/project`
