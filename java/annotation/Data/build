@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#mv META-INF temp
+javac -cp /Library/Java/JavaVirtualMachines/jdk1.8.0_102.jdk/Contents/Home/lib/tools.jar Data.java DataProcessor.java DataTreeTranslator.java
+if [ "$?" != "0" ];then
+  exit
+fi
+#mv temp META-INF
+jar cvf Data.jar Data.class DataProcessor.class DataTreeTranslator.class META-INF
+rm -f *.class
