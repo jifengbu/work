@@ -3,7 +3,16 @@ const fs = require('fs');
 const AdmZip = require('adm-zip');
 const XmlReader = require('xml-reader');
 const _ = require('lodash');
+let hasLog = false;
 
+const valid_list = [
+    [1,2,3,4,5,31,32,33,34,35],
+    [1,2,3,4,5,21,22,23,24,25],
+    [1,2,3,4,5,11,12,13,14,15],
+    [1,2,3,4,5,6,7,8,9,10],
+    [1,2],
+];
+let current_index = -1;
 
 function parseStyle(xmlStr){
     return xmlStr.match(/<w:style w:type\=\"paragraph\"[\s\S]+?<\/w:style>/ig).map((item)=> {
@@ -58,7 +67,9 @@ function parseNumber(xmlStr) {
     })
     return rtnObj;
 }
-
+function log(...args) {
+    hasLog && console.log(...args);
+}
 
 var Translate = function (filePath) {
     this.zip = new AdmZip(filePath);
@@ -85,11 +96,12 @@ Translate.prototype.traverseNodes = function (nodes, fun) {
 Translate.prototype.parseBody = function (nodes) {
     nodes.forEach((item)=> {
         if (item.type === 'element' && item.name === 'w:p') {
-            const x = this.traverseNodes(item.children, 'paragraph');
-            this.content += x;
-            this.content += '\r\n\r\n\r\n'
+            const paragraph = this.traverseNodes(item.children, 'paragraph');
+            if (paragraph) {
+                this.content += paragraph + '\n';
+            }
         } else {
-            console.log('[parseBody]: type : ' + item.type + ' And name:' + item.name + ' not supported');
+            log('[parseBody]: type : ' + item.type + ' And name:' + item.name + ' not supported');
         }
     })
 };
@@ -101,7 +113,21 @@ Translate.prototype.paragraph = function (node) {
     if (node.type === 'element' && node.name === 'w:pPr') {
         //pPr为段落样式；
         if (node.children) {
-            pText += self.traverseNodes(node.children, 'paragraphStyle');
+            const no = self.traverseNodes(node.children, 'paragraphStyle');
+            if (no === '__title__') {
+                this.skip = false;
+                pText += '';
+            } else if (/^\d+\. $/.test(no)) {
+                const num = +(no.match(/\d+/)[0]);
+                if (valid_list[current_index].indexOf(num) === -1) {
+                    this.skip = true;
+                } else {
+                    this.skip = false;
+                    pText += no;
+                }
+            } else if (!this.skip){
+                pText +=  no;
+            }
         }
     } else if (node.type === 'element' && node.name === 'w:t') {
         if (node.children) {
@@ -113,9 +139,11 @@ Translate.prototype.paragraph = function (node) {
         }
     } else if (node.type === 'text' && node.name === '') {
         //文本文档
-        pText += node.value;
+        if (!this.skip) {
+            pText += node.value;
+        }
     } else {
-        console.log('[paragraph]: type : ' + node.type + ' And name:' + node.name + ' not supported');
+        log('[paragraph]: type : ' + node.type + ' And name:' + node.name + ' not supported');
     }
     return pText;
 };
@@ -128,7 +156,6 @@ Translate.prototype.paragraphStyle = function (node) {
         try {
             id = node['attributes']['w\:val'];
         } catch (e) {
-            //console.log(e);
             return pStyleText;
         }
         self.pStyleArr.some((item)=> {
@@ -146,25 +173,11 @@ Translate.prototype.paragraphStyle = function (node) {
             pStyleText += self.handleNumPr(node);
         }
     } else {
-        console.log('[paragraphStyle]: type : ' + node.type + ' And name:' + node.name + ' not supported');
+        log('[paragraphStyle]: type : ' + node.type + ' And name:' + node.name + ' not supported');
     }
     return pStyleText;
 };
 Translate.prototype.handleHeadNum = function (str) {
-    var self = this;
-    var headStr = '';
-    let handleHeading = function(str){
-        let re = /\d+/;
-        let num = Number(str.match(re)[0]);
-        let headStr = '';
-
-        for(let i=1; i<=num; i++){
-            headStr += '#';
-        }
-        headStr +=' ';
-        return headStr;
-    };
-
     switch (str) {
         case 'heading 1':
         case 'heading 2':
@@ -172,12 +185,12 @@ Translate.prototype.handleHeadNum = function (str) {
         case 'heading 4':
         case 'heading 5':
         case 'heading 6':
-        headStr += handleHeading(str);
-        break;
+        current_index++;
+        return '__title__';
         default :
-        console.log('[handleHeadNum]: style = ' + str + ' is not supported')
+        log('[handleHeadNum]: style = ' + str + ' is not supported')
     }
-    return headStr;
+    return '';
 };
 //处理数字的序列号（标题）
 Translate.prototype.handleNumPr = function (node) {
@@ -225,9 +238,9 @@ Translate.prototype.handleNumPr = function (node) {
             }
         })
     } catch (e) {
-        // console.log(e)
-        // console.log('下面标题格式暂不支持');
-        // console.log(node);
+        // log(e)
+        // log('下面标题格式暂不支持');
+        // log(node);
     }
     return numStr;
 }
@@ -247,14 +260,14 @@ Translate.prototype.getHeadNumber = function (num, fmt, lvlText) {
             return  String.fromCharCode(+num+66);
             break;
             default :
-            console.log(`[getHeadNumber]: ${fmt} style is not supported`);
+            log(`[getHeadNumber]: ${fmt} style is not supported`);
             return '';
             break;
         }
     };
 
     if (arr.length > 1) {
-        //console.log('暂不支持多级标题')
+        //log('暂不支持多级标题')
     };
     str += lvlText.replace(/\%\d+?/, getValue(fmt, num));
     return str+' ';
@@ -266,12 +279,12 @@ Translate.prototype.parseDocument = function (callback) {
         if (doc.name === 'w:document' && doc.type === 'element') {
             const body = _.find(doc.children, o=>o.type==='element' && o.name==='w:body');
             if (!body) {
-                console.log('[parseDocument]: can not find w:body label, please checkout!')
+                log('[parseDocument]: can not find w:body label, please checkout!')
             } else {
                 self.parseBody(body.children);
             }
         } else {
-            console.log('[parseDocument]: can not find w:document label, please checkout!');
+            log('[parseDocument]: can not find w:document label, please checkout!');
         }
         callback(self.content);
     });
@@ -279,7 +292,12 @@ Translate.prototype.parseDocument = function (callback) {
 };
 
 
-module.exports = function (path, callback) {
-    var turn = new Translate(path);
-    return turn.parseDocument(callback);
+function main () {
+    hasLog = false;
+    var turn = new Translate('total.docx');
+    turn.parseDocument((html)=>{
+        console.log("=======", html);
+    });
 }
+
+main();
