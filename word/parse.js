@@ -110,6 +110,7 @@ Translate.prototype.paragraph = function (node) {
     var self = this;
     var pObj = {};
     var pText = '';
+
     if (node.type === 'element' && node.name === 'w:pPr') {
         //pPr为段落样式；
         if (node.children) {
@@ -131,7 +132,13 @@ Translate.prototype.paragraph = function (node) {
         }
     } else if (node.type === 'element' && node.name === 'w:t') {
         if (node.children) {
-            pText += self.traverseNodes(node.children, 'paragraph');
+            if (node.attributes['xml:space'] === 'preserve' && current_index === 0) {
+                if (!this.skip) {
+                    pText += '_____';
+                }
+            } else {
+                pText += self.traverseNodes(node.children, 'paragraph');
+            }
         }
     } else if (node.type === 'element' && node.name === 'w:r') {
         if (node.children) {
@@ -143,7 +150,7 @@ Translate.prototype.paragraph = function (node) {
             pText += node.value;
         }
     } else {
-        log('[paragraph]: type : ' + node.type + ' And name:' + node.name + ' not supported');
+        console.log('[paragraph]: type : ' + node.type + ' And name:' + node.name + ' not supported');
     }
     return pText;
 };
