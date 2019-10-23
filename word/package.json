@@ -1,0 +1,7 @@
+{
+  "name": "word",
+  "dependencies": {
+    "adm-zip": "^0.4.13",
+    "xml-reader": "^2.4.3"
+  }
+}
