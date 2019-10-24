@@ -13,6 +13,7 @@ const ANSWER_QUESTION_SUBJECT = 4;
 let hasLog = false;
 let current_index = -1;
 let valid_list = [];
+let translate;
 
 function getList(len, max) {
     var a = [];
@@ -87,15 +88,19 @@ function log(...args) {
 const Translate = function (filePath) {
     this.zip = new AdmZip(filePath);
     this.docx = this.zip.readAsText('word/document.xml');
-
     //存储，记录比标题序列号
-    this.numberContext = {};
     this.pStyleArr = parseStyle(this.zip.readAsText('word/styles.xml'));
     this.numberObj = parseNumber(this.zip.readAsText('word/numbering.xml'));
-
-    this.content = '';
 };
 
+Translate.prototype.init = function (options) {
+    this.numberContext = {};
+    this.content = '';
+    hasLog = options.hasLog;
+    current_index = -1;
+    valid_list = options.list;
+    valid_list.forEach(o=>{ o.list = getList(o.count, o.max) });
+};
 Translate.prototype.traverseNodes = function (nodes, fun) {
     return nodes.map(o=>this[fun](o)).join('');
 };
@@ -111,7 +116,7 @@ Translate.prototype.parseBody = function (nodes) {
         }
     });
     this.content += this.getLastElement();
-    this.content += `<br/><br>\n\n<button onclick="submitScore()">提交试卷</button>`;
+    this.content += `<br/>\n<button class="submitScorebutton" onclick="submitScore()">提交试卷</button><br><br><br>\n`;
     this.content = `
     <link rel="stylesheet" href="css/main.css" />
     <script src="js/jquery-1.4.4.min.js"></script>
@@ -331,10 +336,7 @@ Translate.prototype.parseDocument = function (callback) {
 };
 
 module.exports = function(options, callback) {
-    hasLog = options.hasLog;
-    valid_list = options.list;
-    valid_list.forEach(o=>{ o.list = getList(o.count, o.max) });
-    console.log("=======", options.file);
-    const turn = new Translate(options.file);
-    turn.parseDocument(callback);
+    translate = translate || new Translate(options.file);
+    translate.init(options);
+    translate.parseDocument(callback);
 }

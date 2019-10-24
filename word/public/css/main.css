@@ -1,16 +1,26 @@
+body {
+    padding-left: 10%;
+    padding-right: 10%;
+}
 .FILL_BLANK_SUBJECT {
-    margin-left:  6;
-    margin-right:  6;
+    margin-left:  6px;
+    margin-right:  6px;
 }
 .JUDGEMENT_SUBJECT {
-    margin-left:  100;
+    margin-left:  20px;
+    width: 200px;
 }
 .SINGLE_SELECT_SUBJECT {
-    margin-left:  100;
+    margin-left:  20px;
+    width: 200px;
 }
 .MULTI_SELECT_SUBJECT {
-    margin-left:  100;
+    margin-left:  20px;
+    width: 200px;
 }
 .ANSWER_QUESTION_SUBJECT {
-
+    margin-left:  20px;
+}
+.submitScorebutton {
+    margin-left:  200px;
 }

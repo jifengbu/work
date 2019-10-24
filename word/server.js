@@ -24,6 +24,8 @@ app.get("/test", (req, res)=>{
 });
 
 app.post("/submitScore", (req, res)=>{
+    console.log("=======", req.body);
+    res.send({ success: true, context: { score: 99 } });
 });
 
 app.listen(4000, function() {
