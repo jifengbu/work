@@ -128,7 +128,7 @@ Translate.prototype.getLastElement = function (node) {
     if (this.lastSubject) {
         const type = getSubject().type;
         if (type === JUDGEMENT_SUBJECT) {
-            element = `<select class="JUDGEMENT_SUBJECT" data-type=${type} data-num=${this.subjectNO}><option value=0>正确</option><option value=0>错误</option></select>`;
+            element = `<select class="JUDGEMENT_SUBJECT" data-type=${type} data-num=${this.subjectNO}><option value=1>正确</option><option value=0>错误</option></select>`;
         } else if (type === SINGLE_SELECT_SUBJECT) {
             const list = this.lastSubject.match(/[ABCD]\./g).map(o=>o[0]);
             element = `<select class="SINGLE_SELECT_SUBJECT" data-type=${type} data-num=${this.subjectNO}>${list.map(o=>`<option value=${o}>${o}</option>`).join('')}</select>`;
