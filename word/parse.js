@@ -11,19 +11,24 @@ const SINGLE_SELECT_SUBJECT = 2;
 const MULTI_SELECT_SUBJECT = 3;
 const ANSWER_QUESTION_SUBJECT = 4;
 
-const valid_list = [
-    { type: FILL_BLANK_SUBJECT, list: [1,2,3,4,5,31,32,33,34,35] },
-    { type: JUDGEMENT_SUBJECT, list: [1,2,3,4,5,21,22,23,24,25] },
-    { type: SINGLE_SELECT_SUBJECT, list: [1,2,3,4,5,11,12,13,14,15] },
-    { type: MULTI_SELECT_SUBJECT, list: [1,2,3,4,5,6,7,8,9,10] },
-    { type:ANSWER_QUESTION_SUBJECT, list: [1,2] },
-];
 let current_index = -1;
+let valid_list = [];
 
+function getList(len, max) {
+    var a = [];
+    while (a.length < len) {
+        var t = _.random(1, max);
+        if (!_.includes(a, t)) {
+            a.push(t);
+        }
+    }
+    _.sortBy(a);
+    return a;
+}
 function parseStyle(xmlStr){
     return xmlStr.match(/<w:style w:type\=\"paragraph\"[\s\S]+?<\/w:style>/ig).map((item)=> {
-        var iRe = /w:styleid\=\"([\s\S]+?)\"[\s\S]+?w:name[\s\S]+?w:val\=\"([\s\S]+?)\"[\s\S]+?/ig;
-        var match = iRe.exec(item);
+        const iRe = /w:styleid\=\"([\s\S]+?)\"[\s\S]+?w:name[\s\S]+?w:val\=\"([\s\S]+?)\"[\s\S]+?/ig;
+        const match = iRe.exec(item);
         return {
             id: match[1],
             val: match[2]
@@ -318,13 +323,10 @@ Translate.prototype.parseDocument = function (callback) {
     reader.parse(this.docx);
 };
 
-
-function main () {
-    hasLog = false;
+module.exports = function(options, callback) {
+    hasLog = options.hasLog;
+    valid_list = options.list;
+    valid_list.forEach(o=>{ o.list = getList(o.count, o.max) });
     const turn = new Translate('subject.docx');
-    turn.parseDocument((html)=>{
-        console.log(html);
-    });
+    turn.parseDocument(callback);
 }
-
-main();
