@@ -321,7 +321,7 @@ Translate.prototype.parseDocument = function (callback) {
 
 function main () {
     hasLog = false;
-    const turn = new Translate('total.docx');
+    const turn = new Translate('subject.docx');
     turn.parseDocument((html)=>{
         console.log(html);
     });
