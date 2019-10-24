@@ -100,7 +100,7 @@ Translate.prototype.parseBody = function (nodes) {
         if (item.type === 'element' && item.name === 'w:p') {
             const paragraph = this.traverseNodes(item.children, 'paragraph');
             if (paragraph) {
-                this.content += paragraph + '\n';
+                this.content += paragraph + '<br/>\n';
             }
         } else {
             log('[parseBody]: type : ' + item.type + ' and name:' + item.name + ' not supported');
@@ -111,19 +111,20 @@ Translate.prototype.parseBody = function (nodes) {
 Translate.prototype.getLastElement = function (node) {
     let element = '';
     if (this.lastSubject) {
-        if (getSubject().type === JUDGEMENT_SUBJECT) {
-            element = 'JUDGEMENT_SUBJECT';
-        } else if (getSubject().type === SINGLE_SELECT_SUBJECT) {
-            const list = this.lastSubject.match(/[ABCD]\./g);
-            element = 'SINGLE_SELECT_SUBJECT'+list;
-        } else if (getSubject().type === MULTI_SELECT_SUBJECT) {
-            const list = this.lastSubject.match(/[ABCD]\./g);
-            element = 'MULTI_SELECT_SUBJECT'+list;
-        } else if (getSubject().type === ANSWER_QUESTION_SUBJECT) {
-            element = 'ANSWER_QUESTION_SUBJECT';
+        const type = getSubject().type;
+        if (type === JUDGEMENT_SUBJECT) {
+            element = `<select data-type=${type} data-num=${this.subjectNO}><option value=0>正确</option><option value=0>错误</option></select>`;
+        } else if (type === SINGLE_SELECT_SUBJECT) {
+            const list = this.lastSubject.match(/[ABCD]\./g).map(o=>o[0]);
+            element = `<select data-type=${type} data-num=${this.subjectNO}>${list.map(o=>`<option value=${o}>${o}</option>`).join('')}</select>`;
+        } else if (type === MULTI_SELECT_SUBJECT) {
+            const list = this.lastSubject.match(/[ABCD]\./g).map(o=>o[0]);
+            element = `<select multiple data-type=${type} data-num=${this.subjectNO}>${list.map(o=>`<option value=${o}>${o}</option>`).join('')}</select>`;
+        } else if (type === ANSWER_QUESTION_SUBJECT) {
+            element = `<textarea data-type=${type} data-num=${this.subjectNO} rows="10" cols="80"></textarea>`;
         }
     }
-    return element ? element + '\n\n' : '';
+    return element ? element + '<br/><br/>\n\n' : '';
 }
 Translate.prototype.paragraph = function (node) {
     let pObj = {};
@@ -181,7 +182,7 @@ Translate.prototype.paragraph = function (node) {
     } else if (node.type === 'text' && node.name === '') {
         //文本文档
         if (!this.skip) {
-            pText += (this.inputSize > 0 ? `<input data-num=${this.subjectNO} data-index=${this.inputIndex} data-size=${this.inputSize} />` : '') + node.value;
+            pText += (this.inputSize > 0 ? `<input data-type=${FILL_BLANK_SUBJECT} data-num=${this.subjectNO} data-index=${this.inputIndex} data-size=${this.inputSize} />` : '') + node.value;
             this.inputSize = 0;
             this.inputIndex++;
             if (this.isSubject) {
@@ -322,7 +323,7 @@ function main () {
     hasLog = false;
     const turn = new Translate('total.docx');
     turn.parseDocument((html)=>{
-        console.log("=======", html);
+        console.log(html);
     });
 }
 
