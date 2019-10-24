@@ -4,7 +4,6 @@ const AdmZip = require('adm-zip');
 const XmlReader = require('xml-reader');
 const _ = require('lodash');
 let hasLog = false;
-const inputOption = {};
 
 const FILL_BLANK_SUBJECT = 0;
 const JUDGEMENT_SUBJECT = 1;
@@ -43,7 +42,7 @@ function parseNumber(xmlStr) {
             let lvlRe = /w:lvl[\s\S]+?w:ilvl\=\"([\s\S]+?)\"[\s\S]+?<w:start[\s\S]+?w:val=\"([\s\S]+?)\"[\s\S]+?<w:numFmt[\s\S]+?w:val\=\"([\s\S]+?)\"\/>[\s\S]+?w:lvlText\s+?w:val=\"([\s\S]+?)\"[\s\S]+?<\/w:lvl>/ig;
             let match2 = lvlRe.exec(otem);
             return {
-                ilvlID: match2[1],
+                ilvl: match2[1],
                 numFmt: match2[3],
                 lvlText: match2[4],
                 start: match2[2]
@@ -74,6 +73,9 @@ function parseNumber(xmlStr) {
     })
     return rtnObj;
 }
+function getSubject() {
+    return valid_list[current_index] || { list:[] };
+}
 function log(...args) {
     hasLog && console.log(...args);
 }
@@ -87,13 +89,6 @@ var Translate = function (filePath) {
     this.pStyleArr = parseStyle(this.zip.readAsText('word/styles.xml'));
     this.numberObj = parseNumber(this.zip.readAsText('word/numbering.xml'));
 
-    //准备在之后将所有的页面数据存储在这个object里面，然后再次输出
-    this.contentObj = {
-        head: {},
-        body: [],
-        footer: {},
-        comment: {}
-    }
     this.content = '';
 };
 
@@ -105,75 +100,101 @@ Translate.prototype.parseBody = function (nodes) {
         if (item.type === 'element' && item.name === 'w:p') {
             const paragraph = this.traverseNodes(item.children, 'paragraph');
             if (paragraph) {
-                console.log("=======", current_index);
                 this.content += paragraph + '\n';
             }
         } else {
-            log('[parseBody]: type : ' + item.type + ' And name:' + item.name + ' not supported');
+            log('[parseBody]: type : ' + item.type + ' and name:' + item.name + ' not supported');
         }
-    })
+    });
+    this.content += this.getLastElement();
 };
-//处理段落
+Translate.prototype.getLastElement = function (node) {
+    let element = '';
+    if (this.lastSubject) {
+        if (getSubject().type === JUDGEMENT_SUBJECT) {
+            element = 'JUDGEMENT_SUBJECT';
+        } else if (getSubject().type === SINGLE_SELECT_SUBJECT) {
+            const list = this.lastSubject.match(/[ABCD]\./g);
+            element = 'SINGLE_SELECT_SUBJECT'+list;
+        } else if (getSubject().type === MULTI_SELECT_SUBJECT) {
+            const list = this.lastSubject.match(/[ABCD]\./g);
+            element = 'MULTI_SELECT_SUBJECT'+list;
+        } else if (getSubject().type === ANSWER_QUESTION_SUBJECT) {
+            element = 'ANSWER_QUESTION_SUBJECT';
+        }
+    }
+    return element ? element + '\n\n' : '';
+}
 Translate.prototype.paragraph = function (node) {
-    var self = this;
-    var pObj = {};
-    var pText = '';
+    let pObj = {};
+    let pText = '';
 
     if (node.type === 'element' && node.name === 'w:pPr') {
         //pPr为段落样式；
         if (node.children) {
-            const no = self.traverseNodes(node.children, 'paragraphStyle');
+            const no = this.traverseNodes(node.children, 'paragraphStyle');
             if (no === '__title__') {
+                pText += this.getLastElement() + '';
                 this.skip = false;
-                pText += '';
-            } else if (/^\d+\. $/.test(no)) {
+                this.isSubject = false; // 是否是题目
+                this.lastSubject = ''; // 上一道题目
+                current_index++;
+            } else if (/^\d+\.$/.test(no)) {
                 const num = +(no.match(/\d+/)[0]);
-                if (valid_list[current_index].list.indexOf(num) === -1) {
+                if (getSubject().list.indexOf(num) === -1) {
                     this.skip = true;
                 } else {
+                    pText += this.getLastElement() + no + ' ';
                     this.skip = false;
-                    pText += no;
-                    inputOption.index = 0;
-                    inputOption.size = 0;
+                    this.subjectNO = num; // 题目的题号
+                    this.inputIndex = 0; // 填空题的填空序号
+                    this.inputSize = 0; // 填空题的填空size
+                    // 记录当前题的做题控件
+                    this.isSubject = true; // 是否是题目
+                    this.lastSubject = ''; // 上一道题目
                 }
             } else if (!this.skip){
-                pText +=  no;
+                pText +=  no + ' ';
+                if (this.isSubject) {
+                    this.lastSubject += no;
+                }
             }
         }
     } else if (node.type === 'element' && node.name === 'w:t') {
         if (node.children) {
             if (node.attributes['xml:space'] === 'preserve' && current_index === 0) {
                 if (!this.skip) {
-                    if (valid_list[current_index].type === FILL_BLANK_SUBJECT) {
-                        inputOption.size++;
+                    if (getSubject().type === FILL_BLANK_SUBJECT) {
+                        this.inputSize++;
                     } else {
                         pText += '    ';
                     }
                 }
             } else {
-                pText += self.traverseNodes(node.children, 'paragraph');
+                pText += this.traverseNodes(node.children, 'paragraph');
             }
         }
     } else if (node.type === 'element' && node.name === 'w:r') {
         if (node.children) {
-            pText += self.traverseNodes(node.children, 'paragraph');
+            pText += this.traverseNodes(node.children, 'paragraph');
         }
     } else if (node.type === 'text' && node.name === '') {
         //文本文档
         if (!this.skip) {
-            pText += (inputOption.size > 0 ? `<input data-index=${inputOption.index} data-size=${inputOption.size} />` : '') + node.value;
-            inputOption.continue = false;
-            inputOption.size = 0;
-            inputOption.index++;
+            pText += (this.inputSize > 0 ? `<input data-num=${this.subjectNO} data-index=${this.inputIndex} data-size=${this.inputSize} />` : '') + node.value;
+            this.inputSize = 0;
+            this.inputIndex++;
+            if (this.isSubject) {
+                this.lastSubject += node.value;
+            }
         }
     } else {
-        log('[paragraph]: type : ' + node.type + ' And name:' + node.name + ' not supported');
+        log('[paragraph]: type : ' + node.type + ' and name:' + node.name + ' not supported');
     }
     return pText;
 };
 Translate.prototype.paragraphStyle = function (node) {
-    var self = this;
-    var pStyleText = '';
+    let pStyleText = '';
     if (node.type === 'element' && node.name === 'w:pStyle') {
         //pPr为段落样式；
         var id;
@@ -182,22 +203,22 @@ Translate.prototype.paragraphStyle = function (node) {
         } catch (e) {
             return pStyleText;
         }
-        self.pStyleArr.some((item)=> {
+        this.pStyleArr.some((item)=> {
             if (item['id'] === id) {
                 //如果是一级标题的话
-                pStyleText += self.handleHeadNum(item['val']);
+                pStyleText += this.handleHeadNum(item['val']);
                 return true;
             }
         });
         if (node.children) {
-            pStyleText += self.traverseNodes(node.children, 'paragraphStyle')
+            pStyleText += this.traverseNodes(node.children, 'paragraphStyle')
         }
     } else if (node.type === 'element' && node.name === 'w:numPr') {
         if (node.children) {
-            pStyleText += self.handleNumPr(node);
+            pStyleText += this.handleNumPr(node);
         }
     } else {
-        log('[paragraphStyle]: type : ' + node.type + ' And name:' + node.name + ' not supported');
+        log('[paragraphStyle]: type : ' + node.type + ' and name:' + node.name + ' not supported');
     }
     return pStyleText;
 };
@@ -209,7 +230,6 @@ Translate.prototype.handleHeadNum = function (str) {
         case 'heading 4':
         case 'heading 5':
         case 'heading 6':
-        current_index++;
         return '__title__';
         default :
         log('[handleHeadNum]: style = ' + str + ' is not supported')
@@ -218,61 +238,46 @@ Translate.prototype.handleHeadNum = function (str) {
 };
 //处理数字的序列号（标题）
 Translate.prototype.handleNumPr = function (node) {
-    var self = this;
-    var numStr = '';
-    var ilvlID;
-    var id;
+    let ilvl, numId, numStr = '';
 
     node.children.forEach((item)=> {
         if (item['name'] === 'w:ilvl') {
-            ilvlID = item['attributes']['w:val'];
-        }
-        if (item['name'] === 'w:numId') {
-            id = item['attributes']['w:val'];
+            ilvl = item['attributes']['w:val'];
+        } else if (item['name'] === 'w:numId') {
+            numId = item['attributes']['w:val'];
         }
     });
-
     //numId如果等于0，说明这个序号已经被取消掉了
-    if (id == 0) {
+    if (numId == 0) {
         return numStr;
     }
-
-    try {
-        self.numberObj[id].children.some((o)=> {
-            if (o.ilvlID === ilvlID) {
-                ilvlID = parseInt(ilvlID);
-                if (!(self.numberContext[id] && self.numberContext[id][ilvlID]) ){
-                    if(!Array.isArray(self.numberContext[id])){
-                        // self.numberContext[id] = new Array(20).fill(0);
-                        self.numberContext[id] = [];
-                    }
-                    self.numberContext[id][ilvlID] = {
-                        start: o.start,
-                        current: parseInt(o.start),
-                        format: o.numFmt
-                    }
-                } else {
-                    self.numberContext[id][ilvlID].current++;
-                    for(let i=self.numberContext[id].length-1;i>ilvlID;i--){
-                        self.numberContext[id][i] = 0;
-                    }
+    this.numberObj[numId].children.some((o)=> {
+        if (o.ilvl === ilvl) {
+            ilvl = parseInt(ilvl);
+            if (!(this.numberContext[numId] && this.numberContext[numId][ilvl]) ){
+                if(!Array.isArray(this.numberContext[numId])){
+                    this.numberContext[numId] = [];
                 }
-                numStr += self.getHeadNumber(self.numberContext[id][ilvlID].current, self.numberContext[id][ilvlID].format, o.lvlText);
-                return true;
+                this.numberContext[numId][ilvl] = {
+                    start: o.start,
+                    current: parseInt(o.start),
+                    format: o.numFmt
+                }
+            } else {
+                this.numberContext[numId][ilvl].current++;
+                for(let i=this.numberContext[numId].length-1;i>ilvl;i--){
+                    this.numberContext[numId][i] = 0;
+                }
             }
-        })
-    } catch (e) {
-        // log(e)
-        // log('下面标题格式暂不支持');
-        // log(node);
-    }
+            numStr += this.getHeadNumber(this.numberContext[numId][ilvl].current, this.numberContext[numId][ilvl].format, o.lvlText);
+            return true;
+        }
+    });
     return numStr;
 }
 Translate.prototype.getHeadNumber = function (num, fmt, lvlText) {
-    var self = this;
-    var str = '';
-    var arr = lvlText.match(/\%\d+?/g);
-    var getValue = function (fmt, num) {
+    const arr = lvlText.match(/\%\d+?/g);
+    const getValue = function (fmt, num) {
         switch (fmt) {
             case 'decimal':
             return num;
@@ -289,15 +294,12 @@ Translate.prototype.getHeadNumber = function (num, fmt, lvlText) {
             break;
         }
     };
-
     if (arr.length > 1) {
         //log('暂不支持多级标题')
     };
-    str += lvlText.replace(/\%\d+?/, getValue(fmt, num));
-    return str+' ';
+    return lvlText.replace(/\%\d+?/, getValue(fmt, num));
 }
 Translate.prototype.parseDocument = function (callback) {
-    var self = this;
     const reader = XmlReader.create();
     reader.on('done', doc => {
         if (doc.name === 'w:document' && doc.type === 'element') {
@@ -305,20 +307,20 @@ Translate.prototype.parseDocument = function (callback) {
             if (!body) {
                 log('[parseDocument]: can not find w:body label, please checkout!')
             } else {
-                self.parseBody(body.children);
+                this.parseBody(body.children);
             }
         } else {
             log('[parseDocument]: can not find w:document label, please checkout!');
         }
-        callback(self.content);
+        callback(this.content);
     });
-    reader.parse(self.docx);
+    reader.parse(this.docx);
 };
 
 
 function main () {
     hasLog = false;
-    var turn = new Translate('total.docx');
+    const turn = new Translate('total.docx');
     turn.parseDocument((html)=>{
         console.log("=======", html);
     });
