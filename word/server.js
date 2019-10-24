@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
-const parse = require('./parse');
+const parseSubject = require('./lib/parseSubject');
 const app = express();
 
 const list = [
@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.text());
 
 app.get("/test", (req, res)=>{
-    parse({ list }, (html)=>{
+    parseSubject({ list, file: __dirname + '/assets/subject.docx' }, (html)=>{
         res.send(html);
     });
 });

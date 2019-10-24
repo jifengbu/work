@@ -334,6 +334,7 @@ module.exports = function(options, callback) {
     hasLog = options.hasLog;
     valid_list = options.list;
     valid_list.forEach(o=>{ o.list = getList(o.count, o.max) });
-    const turn = new Translate('subject.docx');
+    console.log("=======", options.file);
+    const turn = new Translate(options.file);
     turn.parseDocument(callback);
 }
