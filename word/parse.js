@@ -4,13 +4,20 @@ const AdmZip = require('adm-zip');
 const XmlReader = require('xml-reader');
 const _ = require('lodash');
 let hasLog = false;
+const inputOption = {};
+
+const FILL_BLANK_SUBJECT = 0;
+const JUDGEMENT_SUBJECT = 1;
+const SINGLE_SELECT_SUBJECT = 2;
+const MULTI_SELECT_SUBJECT = 3;
+const ANSWER_QUESTION_SUBJECT = 4;
 
 const valid_list = [
-    [1,2,3,4,5,31,32,33,34,35],
-    [1,2,3,4,5,21,22,23,24,25],
-    [1,2,3,4,5,11,12,13,14,15],
-    [1,2,3,4,5,6,7,8,9,10],
-    [1,2],
+    { type: FILL_BLANK_SUBJECT, list: [1,2,3,4,5,31,32,33,34,35] },
+    { type: JUDGEMENT_SUBJECT, list: [1,2,3,4,5,21,22,23,24,25] },
+    { type: SINGLE_SELECT_SUBJECT, list: [1,2,3,4,5,11,12,13,14,15] },
+    { type: MULTI_SELECT_SUBJECT, list: [1,2,3,4,5,6,7,8,9,10] },
+    { type:ANSWER_QUESTION_SUBJECT, list: [1,2] },
 ];
 let current_index = -1;
 
@@ -98,6 +105,7 @@ Translate.prototype.parseBody = function (nodes) {
         if (item.type === 'element' && item.name === 'w:p') {
             const paragraph = this.traverseNodes(item.children, 'paragraph');
             if (paragraph) {
+                console.log("=======", current_index);
                 this.content += paragraph + '\n';
             }
         } else {
@@ -120,11 +128,13 @@ Translate.prototype.paragraph = function (node) {
                 pText += '';
             } else if (/^\d+\. $/.test(no)) {
                 const num = +(no.match(/\d+/)[0]);
-                if (valid_list[current_index].indexOf(num) === -1) {
+                if (valid_list[current_index].list.indexOf(num) === -1) {
                     this.skip = true;
                 } else {
                     this.skip = false;
                     pText += no;
+                    inputOption.index = 0;
+                    inputOption.size = 0;
                 }
             } else if (!this.skip){
                 pText +=  no;
@@ -134,7 +144,11 @@ Translate.prototype.paragraph = function (node) {
         if (node.children) {
             if (node.attributes['xml:space'] === 'preserve' && current_index === 0) {
                 if (!this.skip) {
-                    pText += '_____';
+                    if (valid_list[current_index].type === FILL_BLANK_SUBJECT) {
+                        inputOption.size++;
+                    } else {
+                        pText += '    ';
+                    }
                 }
             } else {
                 pText += self.traverseNodes(node.children, 'paragraph');
@@ -147,10 +161,13 @@ Translate.prototype.paragraph = function (node) {
     } else if (node.type === 'text' && node.name === '') {
         //文本文档
         if (!this.skip) {
-            pText += node.value;
+            pText += (inputOption.size > 0 ? `<input data-index=${inputOption.index} data-size=${inputOption.size} />` : '') + node.value;
+            inputOption.continue = false;
+            inputOption.size = 0;
+            inputOption.index++;
         }
     } else {
-        console.log('[paragraph]: type : ' + node.type + ' And name:' + node.name + ' not supported');
+        log('[paragraph]: type : ' + node.type + ' And name:' + node.name + ' not supported');
     }
     return pText;
 };
