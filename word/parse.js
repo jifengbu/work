@@ -3,7 +3,6 @@ const fs = require('fs');
 const AdmZip = require('adm-zip');
 const XmlReader = require('xml-reader');
 const _ = require('lodash');
-let hasLog = false;
 
 const FILL_BLANK_SUBJECT = 0;
 const JUDGEMENT_SUBJECT = 1;
@@ -11,6 +10,7 @@ const SINGLE_SELECT_SUBJECT = 2;
 const MULTI_SELECT_SUBJECT = 3;
 const ANSWER_QUESTION_SUBJECT = 4;
 
+let hasLog = false;
 let current_index = -1;
 let valid_list = [];
 
@@ -35,7 +35,6 @@ function parseStyle(xmlStr){
         }
     });
 }
-
 function parseNumber(xmlStr) {
     const rtnObj = {};
     //<abstractNumId>标签内的各种属性
@@ -112,21 +111,27 @@ Translate.prototype.parseBody = function (nodes) {
         }
     });
     this.content += this.getLastElement();
+    this.content += `<br/><br>\n\n<button onclick="submitScore()">提交试卷</button>`;
+    this.content = `
+    <link rel="stylesheet" href="css/main.css" />
+    <script src="js/jquery-1.4.4.min.js"></script>
+    <script src="js/score.js"></script>
+    ` + this.content;
 };
 Translate.prototype.getLastElement = function (node) {
     let element = '';
     if (this.lastSubject) {
         const type = getSubject().type;
         if (type === JUDGEMENT_SUBJECT) {
-            element = `<select data-type=${type} data-num=${this.subjectNO}><option value=0>正确</option><option value=0>错误</option></select>`;
+            element = `<select class="JUDGEMENT_SUBJECT" data-type=${type} data-num=${this.subjectNO}><option value=0>正确</option><option value=0>错误</option></select>`;
         } else if (type === SINGLE_SELECT_SUBJECT) {
             const list = this.lastSubject.match(/[ABCD]\./g).map(o=>o[0]);
-            element = `<select data-type=${type} data-num=${this.subjectNO}>${list.map(o=>`<option value=${o}>${o}</option>`).join('')}</select>`;
+            element = `<select class="SINGLE_SELECT_SUBJECT" data-type=${type} data-num=${this.subjectNO}>${list.map(o=>`<option value=${o}>${o}</option>`).join('')}</select>`;
         } else if (type === MULTI_SELECT_SUBJECT) {
             const list = this.lastSubject.match(/[ABCD]\./g).map(o=>o[0]);
-            element = `<select multiple data-type=${type} data-num=${this.subjectNO}>${list.map(o=>`<option value=${o}>${o}</option>`).join('')}</select>`;
+            element = `<select class="MULTI_SELECT_SUBJECT" multiple data-type=${type} data-num=${this.subjectNO}>${list.map(o=>`<option value=${o}>${o}</option>`).join('')}</select>`;
         } else if (type === ANSWER_QUESTION_SUBJECT) {
-            element = `<textarea data-type=${type} data-num=${this.subjectNO} rows="10" cols="80"></textarea>`;
+            element = `<textarea class="ANSWER_QUESTION_SUBJECT" data-type=${type} data-num=${this.subjectNO} rows="10" cols="80"></textarea>`;
         }
     }
     return element ? element + '<br/><br/>\n\n' : '';
@@ -189,7 +194,7 @@ Translate.prototype.paragraph = function (node) {
     } else if (node.type === 'text' && node.name === '') {
         //文本文档
         if (!this.skip) {
-            pText += (this.inputSize > 0 ? `<input data-type=${FILL_BLANK_SUBJECT} data-num=${this.subjectNO} data-index=${this.inputIndex} data-size=${this.inputSize} />` : '') + node.value;
+            pText += (this.inputSize > 0 ? `<input class="FILL_BLANK_SUBJECT" data-type=${FILL_BLANK_SUBJECT} data-num=${this.subjectNO} data-index=${this.inputIndex} data-size=${this.inputSize} />` : '') + node.value;
             this.inputSize = 0;
             this.inputIndex++;
             if (this.isSubject) {
