@@ -85,7 +85,7 @@ function log(...args) {
     hasLog && console.log(...args);
 }
 
-var Translate = function (filePath) {
+const Translate = function (filePath) {
     this.zip = new AdmZip(filePath);
     this.docx = this.zip.readAsText('word/document.xml');
 
@@ -144,13 +144,14 @@ Translate.prototype.paragraph = function (node) {
                 this.skip = false;
                 this.isSubject = false; // 是否是题目
                 this.lastSubject = ''; // 上一道题目
+                this.subjectIndex = 1; // 实际题号
                 current_index++;
             } else if (/^\d+\.$/.test(no)) {
                 const num = +(no.match(/\d+/)[0]);
                 if (getSubject().list.indexOf(num) === -1) {
                     this.skip = true;
                 } else {
-                    pText += this.getLastElement() + no + ' ';
+                    pText += this.getLastElement() + this.subjectIndex + '. ';
                     this.skip = false;
                     this.subjectNO = num; // 题目的题号
                     this.inputIndex = 0; // 填空题的填空序号
@@ -158,6 +159,7 @@ Translate.prototype.paragraph = function (node) {
                     // 记录当前题的做题控件
                     this.isSubject = true; // 是否是题目
                     this.lastSubject = ''; // 上一道题目
+                    this.subjectIndex++;
                 }
             } else if (!this.skip){
                 pText +=  no + ' ';
