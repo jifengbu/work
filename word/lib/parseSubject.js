@@ -3,12 +3,13 @@ const fs = require('fs');
 const AdmZip = require('adm-zip');
 const XmlReader = require('xml-reader');
 const _ = require('lodash');
-
-const FILL_BLANK_SUBJECT = 0;
-const JUDGEMENT_SUBJECT = 1;
-const SINGLE_SELECT_SUBJECT = 2;
-const MULTI_SELECT_SUBJECT = 3;
-const ANSWER_QUESTION_SUBJECT = 4;
+const {
+    FILL_BLANK_SUBJECT,
+    JUDGEMENT_SUBJECT,
+    SINGLE_SELECT_SUBJECT,
+    MULTI_SELECT_SUBJECT,
+    ANSWER_QUESTION_SUBJECT,
+} = require(../config);
 
 let hasLog = false;
 let current_index = -1;
@@ -200,8 +201,10 @@ Translate.prototype.paragraph = function (node) {
         //文本文档
         if (!this.skip) {
             pText += (this.inputSize > 0 ? `<input class="FILL_BLANK_SUBJECT" data-type=${FILL_BLANK_SUBJECT} data-num=${this.subjectNO} data-index=${this.inputIndex} data-size=${this.inputSize} />` : '') + node.value;
-            this.inputSize = 0;
-            this.inputIndex++;
+            if (this.inputSize > 0) {
+                this.inputSize = 0;
+                this.inputIndex++;
+            }
             if (this.isSubject) {
                 this.lastSubject += node.value;
             }

@@ -4,60 +4,51 @@ const SINGLE_SELECT_SUBJECT = 2;
 const MULTI_SELECT_SUBJECT = 3;
 const ANSWER_QUESTION_SUBJECT = 4;
 
-function parseForFillBlankSubject() {
-    const answers = [];
+function parseForFillBlankSubject(answers) {
     $("[data-type=" + FILL_BLANK_SUBJECT + "]").each((k, o)=>{
         const num = $(o).data('num');
         const index = $(o).data('index');
         const value = $(o).val();
-        answers.push({ num, index, value });
+        answers.push({ type: FILL_BLANK_SUBJECT, num, index, value });
     });
-    return answers;
 }
 
-function parseForJudgementSubject() {
-    const answers = [];
+function parseForJudgementSubject(answers) {
     $("[data-type=" + JUDGEMENT_SUBJECT + "]").each((k, o)=>{
         var num = $(o).data('num');
-        var value = $(o).val();
-        answers.push({ num,  value });
+        var value = $(o).val()*1;
+        answers.push({ type: JUDGEMENT_SUBJECT, num,  value });
     });
-    return answers;
 }
-function parseForSingleSelectSubject() {
-    const answers = [];
+function parseForSingleSelectSubject(answers) {
     $("[data-type=" + SINGLE_SELECT_SUBJECT + "]").each((k, o)=>{
         var num = $(o).data('num');
         var value = $(o).val();
-        answers.push({ num,  value });
+        answers.push({ type: SINGLE_SELECT_SUBJECT, num,  value });
     });
-    return answers;
 }
-function parseForMultiSelectSubject() {
-    const answers = [];
+function parseForMultiSelectSubject(answers) {
     $("[data-type=" + MULTI_SELECT_SUBJECT + "]").each((k, o)=>{
         var num = $(o).data('num');
         var value = $(o).val();
-        answers.push({ num,  value });
+        answers.push({ type: MULTI_SELECT_SUBJECT, num,  value });
     });
-    return answers;
 }
-function parseForAnswerQuestionSubject() {
-    const answers = [];
+function parseForAnswerQuestionSubject(answers) {
     $("[data-type=" + ANSWER_QUESTION_SUBJECT + "]").each((k, o)=>{
         var num = $(o).data('num');
-        var value = $(o).val();
-        answers.push({ num,  value });
+        var value = $(o).val().split('\n').filter(o=>o);
+        answers.push({ type: ANSWER_QUESTION_SUBJECT, num,  value });
     });
-    return answers;
 }
 function submitScore() {
-    const answers = {};
-    answers[FILL_BLANK_SUBJECT] = parseForFillBlankSubject();
-    answers[JUDGEMENT_SUBJECT] = parseForJudgementSubject();
-    answers[SINGLE_SELECT_SUBJECT] = parseForSingleSelectSubject();
-    answers[MULTI_SELECT_SUBJECT] = parseForMultiSelectSubject();
-    answers[ANSWER_QUESTION_SUBJECT] = parseForAnswerQuestionSubject();
+    const answers = [];
+    parseForFillBlankSubject(answers);
+    parseForJudgementSubject(answers);
+    parseForSingleSelectSubject(answers);
+    parseForMultiSelectSubject(answers);
+    parseForAnswerQuestionSubject(answers);
+
     $.ajax({
         type: "POST",
         url: "/submitScore",
