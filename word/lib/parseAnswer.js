@@ -5,7 +5,7 @@ const _ = require('lodash');
 module.exports = function parseAnswer(options, callback) {
     const fsstream = fs.createReadStream(options.file);
     const rl = readline.createInterface({ input: fsstream });
-    const subjects = options.subjects;
+    const answerTitles = options.list.map(o=>o.answerTitle);
     let currentKey, answerQuestionNum;
     const answers = [];
     rl.on('line',function (line) {
@@ -13,8 +13,8 @@ module.exports = function parseAnswer(options, callback) {
         if (!line) {
             return;
         }
-        const key = _.findKey(subjects, o=>o===line);
-        if (key != undefined) {
+        const key = answerTitles.indexOf(line);
+        if (key !== -1) {
             currentKey = key;
         } else {
             if (currentKey == 0) {
