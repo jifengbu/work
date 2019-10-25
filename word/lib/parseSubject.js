@@ -9,7 +9,7 @@ const {
     SINGLE_SELECT_SUBJECT,
     MULTI_SELECT_SUBJECT,
     ANSWER_QUESTION_SUBJECT,
-} = require(../config);
+} = require('../config');
 
 let hasLog = false;
 let current_index = -1;

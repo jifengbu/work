@@ -7,7 +7,7 @@ const {
     SINGLE_SELECT_SUBJECT,
     MULTI_SELECT_SUBJECT,
     ANSWER_QUESTION_SUBJECT,
-} = require(../config);
+} = require('../config');
 
 module.exports = function parseAnswer(options, callback) {
     const fsstream = fs.createReadStream(options.file);
@@ -56,7 +56,7 @@ module.exports = function parseAnswer(options, callback) {
                 if (match) {
                     match.forEach(o=>{
                         const list = o.split('.');
-                        answers.push({ type: MULTI_SELECT_SUBJECT, num: +list[0], value: list[1].split('') });
+                        answers.push({ type: MULTI_SELECT_SUBJECT, num: +list[0], value: list[1] });
                     });
                 }
             } else if (currentType == ANSWER_QUESTION_SUBJECT) {

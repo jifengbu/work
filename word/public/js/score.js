@@ -30,7 +30,7 @@ function parseForSingleSelectSubject(answers) {
 function parseForMultiSelectSubject(answers) {
     $("[data-type=" + MULTI_SELECT_SUBJECT + "]").each((k, o)=>{
         var num = $(o).data('num');
-        var value = $(o).val();
+        var value = $(o).val().join('');
         answers.push({ type: MULTI_SELECT_SUBJECT, num,  value });
     });
 }

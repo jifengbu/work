@@ -20,15 +20,13 @@ app.get("/test", (req, res)=>{
 });
 
 app.post("/submitScore", (req, res)=>{
-    console.log("=======", JSON.stringify(req.body));
-    // res.send({ success: true, context: { score: getScore(req.body, answer) } });
+    res.send({ success: true, context: { score: getScore(req.body, answer) } });
 });
 
 parseAnswer({ list: config.list, file: config.answerFile}, (_answer)=>{
-    // console.log("=======", JSON.stringify(_answer));
     answer = _answer;
     getScore('', answer);
-    // app.listen(4000, function() {
-    //     console.log("server listen on: http://localhost:4000/test");
-    // });
+    app.listen(4000, function() {
+        console.log("server listen on: http://localhost:4000/test");
+    });
 });
