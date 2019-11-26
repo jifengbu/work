@@ -1,0 +1,14 @@
+<canvas id="c" width="500" height="500" style="border:1px solid;"></canvas>
+<script src="js/fabric.min.js"></script>
+<script>
+var canvas = new fabric.Canvas('c');
+fabric.Image.fromURL('img/logo.png', function(image) {
+    image.set({
+        left: 100,
+        top: 100,
+        angle: 30,
+        opacity: 0.85
+    });
+    canvas.add(image);
+});
+</script>
