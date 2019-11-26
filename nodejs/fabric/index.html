@@ -2,13 +2,32 @@
 <script src="js/fabric.min.js"></script>
 <script>
 var canvas = new fabric.Canvas('c');
-fabric.Image.fromURL('img/logo.png', function(image) {
-    image.set({
-        left: 100,
+var image;
+fabric.Image.fromURL('img/logo.png', function(img) {
+    img.set({
+        left: 400,
         top: 100,
         angle: 30,
         opacity: 0.85
     });
-    canvas.add(image);
+    canvas.add(img);
+    image = img;
+    animate();
+    var data = canvas.toJSON();
+    console.log("=======", data);
 });
+function animate() {
+    var isStart = Math.round(image.left) === 50;
+    image && image.animate({
+        'left': isStart ? 400 : 50,
+        opacity: isStart ? 1 : 0.1,
+        angle: isStart ? 100 : 10,
+        scaleX: isStart ? 1 : 0.6,
+        scaleY: isStart ? 1 : 0.6
+    }, {
+        duration: 1500,
+        onChange: canvas.requestRenderAllBound,
+        onComplete: animate
+    });
+}
 </script>
