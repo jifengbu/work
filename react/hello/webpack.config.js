@@ -6,7 +6,7 @@ function getHtmlWebpackPlugin(name, title) {
         template: path.resolve(__dirname, 'index.html'),
         filename: `${name}.html`,
         title,
-        chunks: [ name ],
+        chunks: [ name, 'common', 'vendor' ],
         inject: true,
         minify: {
             removeComments: true,
@@ -31,10 +31,30 @@ module.exports = {
     }, //指定入口文件
     output: {
         path: path.resolve(__dirname, 'dist'), // 输出的路径
-        filename: '[name].bundle.js'  // 打包后文件
+        filename: '[name].bundle.js',  // 打包后文件
+        chunkFilename: "[name].chunk.js",
     },
     optimization: {
         minimize: true,
+        splitChunks: {
+            cacheGroups: {
+                // 注意: priority属性，优先级越大的越先提取
+                // 其次: 打包业务中公共代码
+                common: {
+                    name: "common",
+                    chunks: "all",
+                    minSize: 1,
+                    priority: 0
+                },
+                // 首先: 打包node_modules中的文件
+                vendor: {
+                    name: "vendor",
+                    test: /[\\/]node_modules[\\/]/,
+                    chunks: "all",
+                    priority: 10
+                },
+            }
+        },
     },
     module: {
         //加载器配置
