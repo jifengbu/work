@@ -10,3 +10,4 @@ pids
 package-lock.json
 node_modules
 db
+dist
