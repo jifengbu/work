@@ -1,4 +1,5 @@
 const path = require('path');
+const _ = require('lodash');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
@@ -9,7 +10,7 @@ function getHtmlWebpackPlugin(name, title) {
         template: path.resolve(__dirname, 'public/index.html'),
         filename: `${name}.html`,
         title,
-        chunks: [ name, 'common', 'vendor' ],
+        chunks: [ name ],
         inject: true,
         minify: {
             removeComments: true,
@@ -27,20 +28,20 @@ function getHtmlWebpackPlugin(name, title) {
 }
 
 module.exports = function override(config, env) {
-    config.entry =  {
-        home: './src/home.js',
-        about: './src/about.js',
+    const modules = {
+        home: { file: './src/home.js', title: '首页'},
+        about: { file: './src/about.js', title: '关于页'},
     };
+    config.entry =  _.mapValues(modules, o=>o.file);
     config.plugins = config.plugins.filter(o=>!(
         o instanceof HtmlWebpackPlugin
         || o instanceof ManifestPlugin
         || o instanceof WorkboxWebpackPlugin.GenerateSW
     ));
-    Object.keys(config.entry).forEach(item => {
-        const plugin = getHtmlWebpackPlugin(item, item);
+    _.forEach(modules, (obj, module) => {
+        const plugin = getHtmlWebpackPlugin(module, obj.title);
         config.plugins.unshift(plugin);
     });
     delete config.optimization.runtimeChunk;
-    config.output.path = path.resolve(__dirname, 'dist');
     return config;
 }
