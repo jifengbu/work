@@ -2,8 +2,10 @@
     padding:0;
     margin:0;
 }
-.page:nth-child(1){
-    background:orange;
+.fragment {
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 .page:nth-child(2){
     background:green;
@@ -24,7 +26,7 @@
     text-align:center;
 }
 .page > * {
-    visibility: hidden;
+    /* visibility: hidden; */
 }
 .hide {
     display: none;

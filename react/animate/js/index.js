@@ -52,7 +52,7 @@ function initPage($){
                 $('.arrow-wrap').removeClass('hide');
             }
             el1.children().each(function(){
-                this.style.visibility = 'hidden';
+                $(this).data('animate') && (this.style.visibility = 'hidden');
             });
             el2.children().each(function(){
                 showAnimate(el2, this, $(this).data('animate'));
