@@ -27,10 +27,30 @@ function showAnimate(parent, node, animate, force) {
     }
 }
 function initPage($){
+    // 音乐开关
+    const audio = document.getElementById('audio');
+    if (audio.paused) {
+        $('#audio_button').removeClass('rotate');
+    };
+    $('#audio_button').on('touchend', function() {
+        if (this.classList.contains('rotate')) {
+            audio.pause();
+            this.classList.remove('rotate');
+        } else {
+            audio.play();
+            this.classList.add('rotate');
+        }
+    });
     $("#container").pageSlider({
         pageSelector:".page",
         loop:false,
-        afterMove: function(el1, el2) {
+        afterMove: function(pages, el1, el2, index) {
+            // 不显示最后一张的箭头
+            if (index + 1 === pages.length) {
+                $('.arrow-wrap').addClass('hide');
+            } else {
+                $('.arrow-wrap').removeClass('hide');
+            }
             el1.children().each(function(){
                 this.style.visibility = 'hidden';
             });

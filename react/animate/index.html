@@ -5,39 +5,17 @@
 	<title>Zepto.pageSlider Demo</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 	<link rel="stylesheet" href="css/animate.css">
-	<style type="text/css">
-	*{
-		padding:0;
-		margin:0;
-	}
-	.page:nth-child(1){
-		background:orange;
-	}
-	.page:nth-child(2){
-		background:green;
-	}
-	.page:nth-child(3){
-		background:gold;
-	}
-	.page:nth-child(4){
-		background:black;
-	}
-	.page h1{
-		position:absolute;
-		top:45%;
-		left:0;
-		width:100%;
-		font-size:40px;
-		color:#fff;
-		text-align:center;
-	}
-	.page > * {
-		visibility: hidden;
-	}
-	</style>
+	<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 	<div id="container">
+		<div id="audio_button" class="rotate">
+			<audio id="audio" src="res/mp3/5d9d42c558361.mp3" loop preload autoplay></audio>
+		</div>
+		<div class="arrow-wrap">
+			<div class="arrow1"></div>
+			<div class="arrow2"></div>
+		</div>
 		<div class="page">
 			<h1 data-animate="zoomIn" data-index=1>
 				page 1<br>
@@ -74,10 +52,10 @@
 
 	<script type="text/javascript" src="js/zepto.js"></script>
 	<script type="text/javascript" src="js/pageSlider.js"></script>
-	<script type="text/javascript" src="index.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
 
 	<script type="text/javascript">
-	Zepto(initPage);
+		Zepto(initPage);
 	</script>
 </body>
 </html>

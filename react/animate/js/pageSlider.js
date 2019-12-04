@@ -236,7 +236,7 @@
 
         //beforeMove
         if( typeof this.config.beforeMove == "function" ){
-            that.config.beforeMove($currentPage, this.$pages.eq(index), index);
+            that.config.beforeMove(that.$pages, $currentPage, this.$pages.eq(index), index);
         }
 
         amountPercent = ( -1 * index * ( 100 / this.pageLen ) ) || 0;//不要-0
@@ -247,7 +247,7 @@
         if( typeof this.config.afterMove == "function" ){
             //TODO 需要带上 `transitionend` and `oTransitionEnd` and `otransitionend` 吗?
             this.$ctnInner.one("webkitTransitionEnd",function(e){
-                that.config.afterMove($currentPage, that.$pages.eq(index), index);
+                that.config.afterMove(that.$pages, $currentPage, that.$pages.eq(index), index);
                 if( !isAuto && that.config.auto ){
                     that.autoPlay();
                 }
