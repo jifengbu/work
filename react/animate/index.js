@@ -1,9 +1,10 @@
-function animateCSS(node, animationName, callback) {
-    if (animationName) {
-        node.classList.add('animated', animationName);
+function animateCSS(node, animate, callback) {
+    if (animate) {
+        var animates = animate.split(' ');
+        node.classList.add('animated', ...animates);
         node.classList.remove('hide');
         function handleAnimationEnd() {
-            node.classList.remove('animated', animationName);
+            node.classList.remove('animated', ...animates);
             node.removeEventListener('animationend', handleAnimationEnd);
             typeof callback === 'function' && callback();
         }
