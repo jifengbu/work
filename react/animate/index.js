@@ -1,7 +1,7 @@
 function showAnimate(parent, node, animate, force) {
     if (animate) {
         let animates = animate.split(' ');
-        if (force || !animates.find(o => /^after-/.test(o))) {
+        if (force || !animates.find(o => 'after-' === o.substr(0, 6))) {
             node.classList.add('animated', ...animates);
             node.style.visibility = 'visible';
             function handleAnimationEnd() {
