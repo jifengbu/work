@@ -87,17 +87,24 @@ function getPageTemplate(page) {
     var ul = $(page).find('.edit_wrapper>ul');
     var list = [];
     ul.children().each((index, el)=>{
-        var fm = getMarkdown(el);
-        fm && list.push(fm);
+        var tl = getMarkdown(el);
+        tl.length && list.push(tl);
     });
     return list;
 }
 function getTemplate() {
-    // var pages = $('.main-page');
+    var pages = $('.main-page');
     var pageList = [];
     pages.children().each((index, page)=>{
-        pageList.push(getPageTemplate(page));
+        var tl = getPageTemplate(page);
+        tl.length = pageList.push(tl);
     });
-    return pageList;
+    return JSON.stringify(pageList);
 }
-getTemplate()
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        if (request.action == "getTemplate") {
+            sendResponse({ result: getTemplate() });
+        }
+    }
+);
