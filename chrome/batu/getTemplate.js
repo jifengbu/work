@@ -3,6 +3,10 @@ var options = {
     ANIMATE_DURATION: 2, //默认的动画时长
     ANIMATE_TIMES: 1, //默认的动画播放次数
 };
+function rgbaToHex(rgba) {
+    var list = rgba.replace(/\s*/g, '').match(/rgba?\((\d+),(\d+),(\d+),?(.*)?\)/);
+    return `#${(+list[1]).toString(16).padStart(2, '0')}${(+list[2]).toString(16).padStart(2, '0')}${(+list[3]).toString(16).padStart(2, '0')}${((list[4]||1)*100).toString(16).padStart(2, '0')}`.toUpperCase();
+}
 function uuid() {
     return Math.random().toString().substr(2, 2)
     + Math.random().toString().substr(2, 2)
@@ -11,22 +15,18 @@ function uuid() {
     + Math.random().toString().substr(2, 2);
 }
 function fromatAnimate(animates) {
-    const list = [];
+    var list = [];
     for (animate of animates) {
         if (animate.name) {
-            const duration = !animate.duration || animate.duration==options.ANIMATE_DURATION ? '' : animate.duration;
-            const delay = !animate.delay || animate.delay==options.ANIMATE_DELAY ? '' : animate.delay;
-            const times = !animate.times || animate.times==options.ANIMATE_TIMES ? '' : animate.times;
+            var duration = !animate.duration || animate.duration==options.ANIMATE_DURATION ? '' : animate.duration;
+            var delay = !animate.delay || animate.delay==options.ANIMATE_DELAY ? '' : animate.delay;
+            var times = !animate.times || animate.times==options.ANIMATE_TIMES ? '' : animate.times;
             list.push(`${animate.name||''}:${duration}:${delay}:${times}:${animate.rely||''}`.replace(/:*$/, ''));
         }
     }
     return list.length ? ' a='+list.join('') : '';
 }
 function getMarkdown(el) {
-    // var x = parseFloat(el.style.left);
-    // var y = parseFloat(el.style.top);
-    // var w = parseFloat(el.style.width);
-    // var h = parseFloat(el.style.height);
     var x = el.offsetLeft;
     var y = el.offsetTop;
     var w = el.offsetWidth;
@@ -36,50 +36,68 @@ function getMarkdown(el) {
     var duration = parseFloat(elementBox.style.animationDuration);
     var delay = parseFloat(elementBox.style.animationDelay);
     var times = elementBox.style.animationIterationCount==='infinite'?0:parseFloat(elementBox.style.animationIterationCount);
-    const animate = fromatAnimate([{ name, duration, delay, times }]);
-
+    var animate = fromatAnimate([{ name, duration, delay, times }]);
     var target = elementBox.childNodes[0].childNodes[0];
     var isText = !target.src;
-    const type = !isText ? ' img' : '';
-    let style = '';
+    var type = !isText ? ' img' : '';
+    var style = '';
     if (isText) {
-        const fontSize = el.style.fontSize;
+        if (target.childNodes[0] && target.childNodes[0].childNodes[0]) {
+            if (!target.childNodes[0].childNodes[0] || !target.childNodes[0].childNodes[0].style) {
+                target = target.childNodes[0];
+            } else {
+                target = target.childNodes[0].childNodes[0];
+            }
+        }
+        var color = elementBox.style.color;
+        if (color) {
+            style = `${style}c=${rgbaToHex(color)} `;
+        }
+        var bgcolor = elementBox.style.backgroundColor;
+        if (bgcolor) {
+            style = `${style}bc=${rgbaToHex(bgcolor)} `;
+        }
+        var fontSize = target.style.fontSize;
         if (fontSize) {
             style = `${style}s=${parseFloat(fontSize)} `;
         }
-        const fontWeight = el.style.fontWeight;
+        var fontWeight = target.style.fontWeight;
         if (fontWeight === 'bold') {
             style = `${style}b `;
         }
-        const fontStyle = el.style.fontStyle;
+        var fontStyle = target.style.fontStyle;
         if (fontStyle === 'italic') {
             style = `${style}i `;
-        }
-        const color = el.style.color;
-        if (color) {
-            style = `${style}c=${utils.rgbaToHex(color)} `;
-        }
-        const bgcolor = el.style.backgroundColor;
-        if (bgcolor) {
-            style = `${style}bc=${utils.rgbaToHex(bgcolor)} `;
         }
         if (style) {
             style = ` ${style.trim()}`;
         }
     }
 
-    const text = [];
-    text.push(`::: fm${type} x=${x} y=${y} w=${w} h=${h}${style}${animate} id=${uuid()}`);
-    text.push(isText ? target.innerText : target.src);
-    text.push(':::');
-    return text.join('\n');
+    var list = [];
+    if (target.innerText || target.src) {
+        list.push(`::: fm${type} x=${x} y=${y} w=${w} h=${h}${style}${animate} id=${uuid()}`);
+        list.push(isText ? target.innerText : target.src);
+        list.push(':::');
+        list.push('');
+    }
+    return list;
 }
-function getTemplate() {
-    var ul = $('.z-current .edit_wrapper>ul');
+function getPageTemplate(page) {
+    var ul = $(page).find('.edit_wrapper>ul');
     var list = [];
     ul.children().each((index, el)=>{
-        list.push(getMarkdown(el));
+        var fm = getMarkdown(el);
+        fm && list.push(fm);
     });
-    return list.join('\n\n');
+    return list;
+}
+function getTemplate() {
+    // var pages = $('.main-page');
+    var pageList = [];
+    pages.children().each((index, page)=>{
+        pageList.push(getPageTemplate(page));
+    });
+    return pageList;
 }
 getTemplate()
