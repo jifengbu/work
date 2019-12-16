@@ -8,13 +8,13 @@ $(function(){
             }, function (response) {
                 if (response) {
                     $.ajax({
-                        url: "http://localhost:4000/saveMarkdown",
+                        url: "http://localhost:4000/saveTemplate",
                         cache: false,
                         type: "POST",
-                        data: response.result,
+                        data: { template: response.result },
                         dataType: "json"
                     }).done(function(msg) {
-                        content.html(`写入文件路径:${msg.path}`);
+                        content.html(`写入文件路径: ${msg.path}`);
                     }).fail(function(msg) {
                         content.html('需要开启server里面的服务');
                     });

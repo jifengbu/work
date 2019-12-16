@@ -1,6 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
-var fs = require("fs");
+var fs = require("fs-extra");
+var path = require("path");
 var app = express();
 
 app.use(express.static(__dirname + "/public"));
@@ -15,9 +16,11 @@ app.all('*', (req, res, next) => {
     next();
 });
 
-app.post("/saveMarkdown", (req, res)=>{
-    console.log(req.body);
-    res.send({ path: 'fangyunjiang/fang' });
+app.post("/saveTemplate", (req, res)=>{
+    const template = req.body.template;
+    const file = path.join(__dirname, 'template.md');
+    fs.writeFileSync(file, template);
+    res.send({ path:  file });
 });
 
 app.listen(4000, function() {

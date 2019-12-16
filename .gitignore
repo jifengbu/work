@@ -13,3 +13,4 @@ node_modules
 db
 dist
 build
+/chrome/batu/server/template.md

@@ -74,32 +74,24 @@ function getMarkdown(el) {
         }
     }
 
-    var list = [];
     if (target.innerText || target.src) {
+        var list = [];
         list.push(`::: fm${type} x=${x} y=${y} w=${w} h=${h}${style}${animate} id=${uuid()}`);
         list.push(isText ? target.innerText : target.src);
         list.push(':::');
         list.push('');
+        return list.join('\n');
     }
-    return list;
+    return null;
 }
-function getPageTemplate(page) {
-    var ul = $(page).find('.edit_wrapper>ul');
+function getTemplate() {
+    var ul = $('.edit_wrapper>ul');
     var list = [];
     ul.children().each((index, el)=>{
         var tl = getMarkdown(el);
-        tl.length && list.push(tl);
+        tl && list.push(tl);
     });
-    return list;
-}
-function getTemplate() {
-    var pages = $('.main-page');
-    var pageList = [];
-    pages.children().each((index, page)=>{
-        var tl = getPageTemplate(page);
-        tl.length = pageList.push(tl);
-    });
-    return JSON.stringify(pageList);
+    return list.join('\n');
 }
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
