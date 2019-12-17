@@ -29,11 +29,19 @@ function fromatAnimate(animates) {
     }
     return list.length ? ' a='+list.join('') : '';
 }
+function scalew(v) {
+    return v;
+    return parseInt(v * 375 / 320);
+}
+function scaleh(v) {
+    return v;
+    return parseInt(v * 667 / 486);
+}
 function getMarkdown(el) {
-    var x = el.offsetLeft;
-    var y = el.offsetTop;
-    var w = el.offsetWidth;
-    var h = el.offsetHeight;
+    var x = scalew(el.offsetLeft);
+    var y = scaleh(el.offsetTop);
+    var w = scalew(el.offsetWidth);
+    var h = scaleh(el.offsetHeight);
     var elementBox = el.childNodes[0];
     var name = elementBox.style.animationName;
     var duration = parseFloat(elementBox.style.animationDuration);
