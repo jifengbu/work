@@ -85,18 +85,18 @@ function getMarkdown(el) {
         }
     }
 
-    if (target.innerText || target.src) {
+    if (elementBox.innerText || target.src) {
         var list = [];
         list.push(`::: fm${type} x=${x} y=${y} w=${w} h=${h}${style}${animate} id=${uuid()}`);
-        list.push(isText ? target.innerText : target.src);
+        list.push(isText ? elementBox.innerText : target.src);
         list.push(':::');
         list.push('');
         return list.join('\n');
     }
     return null;
 }
-function getTemplate() {
-    var ul = $('.edit_wrapper>ul');
+function getPageTemplate(page) {
+    var ul = $(page||'.main-page.z-current').find('.edit_wrapper>ul');
     var list = [];
     ul.children().each((index, el)=>{
         var tl = getMarkdown(el);
@@ -104,10 +104,30 @@ function getTemplate() {
     });
     return list.join('\n');
 }
+function getTemplate(list, index, count, done) {
+    list.push(getPageTemplate());
+    if (index === count-1){
+        console.log("已经获取第${index}页，完成");
+        return done(list);
+    }
+    eqxiu.nextPage();
+    console.log(`已经获取第${index}页，继续...`);
+    setTimeout(function() {
+        getTemplate(list, index+1, count, done)
+    }, 10000);
+}
+
+function getAllTemplate(callback) {
+    var count = $('.main-page').size();
+    var list = [];
+    getTemplate(list, 0, count, callback);
+}
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.action == "getTemplate") {
-            sendResponse({ result: getTemplate() });
+            getAllTemplate(function(list) {
+                sendResponse({ result: list.join('======') });
+            });
         }
     }
 );
