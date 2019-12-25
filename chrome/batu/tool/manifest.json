@@ -10,7 +10,7 @@
     },
     "content_scripts": [
         {
-            "matches": ["http://www.zhizuoh5.com/*"],
+            "matches": ["http://xunzhuang.net/*"],
             "js": ["jquery.js", "getTemplate.js"]
         }
     ],

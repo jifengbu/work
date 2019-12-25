@@ -114,11 +114,12 @@ function getTemplate(list, index, count, done) {
     console.log(`已经获取第${index}页，继续...`);
     setTimeout(function() {
         getTemplate(list, index+1, count, done)
-    }, 10000);
+    }, 100);
 }
 
 function getAllTemplate(callback) {
     var count = $('.main-page').size();
+    console.log(`一共${count}页`);
     var list = [];
     getTemplate(list, 0, count, callback);
 }
