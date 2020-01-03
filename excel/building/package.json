@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "exceljs": "^3.5.0",
+    "fs-extra": "^7.0.1"
+  }
+}
