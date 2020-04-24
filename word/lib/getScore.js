@@ -49,7 +49,6 @@ function getAnswerQuestionSocre(value1, value2, unitScore, rightRate) {
 }
 
 module.exports = function(answers, base) {
-    answers = b;
     let score = 0;
     const blankCount = _.filter(answers, o=>o.type === FILL_BLANK_SUBJECT).length;
     const fillBlankRightRight = (_.find(config.list, o=>o.type ===FILL_BLANK_SUBJECT)||{}).rightRate;
