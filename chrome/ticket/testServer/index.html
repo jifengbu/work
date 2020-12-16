@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+    <script src="./jquery.js"></script>
+</head>
+<body style="width:300px ;height:100px">
+    <button id="button">点击</button> <br />
+    <div id="result">0</div>
+    <script>
+    $("#button").click(function(){
+        $.post("/test", { test: true }, function(result){
+            $("#result").html(result.count);
+        });
+    });
+    </script>
+</body>
+</html>

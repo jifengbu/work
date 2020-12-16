@@ -1,0 +1,18 @@
+{
+    "name": "茅台酒真香",
+    "version": "1.0.0",
+    "manifest_version": 2,
+    "description": "枪在手，跟我走，茅台酒，你有我也有！",
+    "browser_action": {
+        "default_title": "查看",
+        "default_icon": "logo.png",
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["http://localhost:4000/*"],
+            "js": ["jquery.js", "main.js"]
+        }
+    ],
+    "permissions" : ["tabs", "activeTab"]
+}
